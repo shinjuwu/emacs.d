@@ -2,7 +2,7 @@
 (defun counsel-escape (keyword)
   (setq keyword (replace-regexp-in-string "\"" "\\\\\"" keyword))
   (setq keyword (replace-regexp-in-string "\\?" "\\\\\?" keyword))
-  (setq keyword (replace-regexp-in-string "\\$" "\\\\\$" keyword))
+  (setq keyword (replace-regexp-in-string "\\$" "\\\\x24" keyword))
   (setq keyword (replace-regexp-in-string "\\*" "\\\\\*" keyword))
   (setq keyword (replace-regexp-in-string "\\." "\\\\\." keyword))
   (setq keyword (replace-regexp-in-string "\\[" "\\\\\[" keyword))
@@ -12,10 +12,8 @@
   ;; the_silver_searcher needs no setup
   (setq keyword (replace-regexp-in-string "(" "\\\\x28" keyword))
   (setq keyword (replace-regexp-in-string ")" "\\\\x29" keyword))
-  (setq keyword (replace-regexp-in-string "{" "\\\\\\{" keyword))
-  (setq keyword (replace-regexp-in-string "}" "\\\\\}" keyword))
-  (setq keyword (replace-regexp-in-string "(" "\\\\\(" keyword))
-  (setq keyword (replace-regexp-in-string ")" "\\\\\)" keyword))
+  (setq keyword (replace-regexp-in-string "{" "\\\\x7b" keyword))
+  (setq keyword (replace-regexp-in-string "}" "\\\\x7d" keyword))
   keyword)
 
 (defun counsel-read-keyword (hint &optional default-when-no-active-region)
@@ -413,6 +411,9 @@ Or else, find files since 24 weeks (6 months) ago."
                         keyword))))
     ;; (message "cmd=%s" cmd)
     cmd))
+(defun my-root-dir ()
+  (file-name-as-directory (and (fboundp 'ffip-get-project-root-directory)
+       (ffip-get-project-root-directory))))
 
 (defun my-grep ()
   "Grep at project root directory or current directory.
@@ -420,15 +421,13 @@ If ag (the_silver_searcher) exists, use ag.
 Extended regex is used, like (pattern1|pattern2)."
   (interactive)
   (let* ((keyword (counsel-read-keyword "Enter grep pattern: "))
-         (dir (and (fboundp 'ffip-get-project-root-directory)
-                   (ffip-get-project-root-directory)))
-         (default-directory (file-name-as-directory dir))
+         (default-directory (my-root-dir))
          (collection (split-string (shell-command-to-string (my-grep-cli keyword)) "[\r\n]+" t)))
 
-    (ivy-read (format "matching \"%s\" at %s:" keyword dir)
+    (ivy-read (format "matching \"%s\" at %s:" keyword (my-root-dir))
               collection
               :action `(lambda (line)
-                         (let* ((default-directory dir))
+                         (let* ((default-directory (my-root-dir)))
                            (counsel--open-grepped-file line))))))
 ;; }}
 
