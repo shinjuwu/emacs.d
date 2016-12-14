@@ -102,7 +102,7 @@
   ;; init-evil dependent on init-clipboard
   (require 'init-clipboard)
   ;; use evil mode (vi key binding)
-  (require 'init-evil)
+  ;;(require 'init-evil)
   (require 'init-multiple-cursors)
   (require 'init-sh)
   (require 'init-ctags)
